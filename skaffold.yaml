@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/ekpoc2017/ekdnata:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/ekpoc2017/ekdnata:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: ekdnata
+        chartPath: charts/ekdnata
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/ekpoc2017/ekdnata'
+          image.tag: '{{.DIGEST_HEX}}'
